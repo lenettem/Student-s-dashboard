@@ -1,325 +1,303 @@
 
-
 import { useState } from 'react';
 
-const initialForm = {
-  name: '',
-  email: '',
-  phone: '',
-  date: '',
-  age: '',
-  portfolio: '',
-  workshop: ''
-};
+const initialCourses = [
+  {
+    id: 1,
+    title: 'Web Development',
+    code: 'DIT101',
+    instructor: 'Mr. James',
+    category: 'Programming',
+    progress: 75,
+    status: 'In Progress'
+  },
+  {
+    id: 2,
+    title: 'Database Management',
+    code: 'DIT102',
+    instructor: 'Ms. Sarah',
+    category: 'Database',
+    progress: 100,
+    status: 'Completed'
+  },
+  {
+    id: 3,
+    title: 'Computer Networking',
+    code: 'DIT103',
+    instructor: 'Mr. Peter',
+    category: 'Networking',
+    progress: 45,
+    status: 'In Progress'
+  },
+  {
+    id: 4,
+    title: 'Programming Fundamentals',
+    code: 'DIT104',
+    instructor: 'Ms. Grace',
+    category: 'Programming',
+    progress: 20,
+    status: 'In Progress'
+  },
+  {
+    id: 5,
+    title: 'Information Systems',
+    code: 'DIT105',
+    instructor: 'Mr. Daniel',
+    category: 'Information Systems',
+    progress: 100,
+    status: 'Completed'
+  },
+  {
+    id: 6,
+    title: 'Computer Applications',
+    code: 'DIT106',
+    instructor: 'Ms. Mary',
+    category: 'Computer Skills',
+    progress: 60,
+    status: 'In Progress'
+  }
+];
 
-function RegistrationCard({ registration, onRemove }) {
+function SummaryCard({ title, value, description }) {
   return (
-    <article className="card">
-      <h3>{registration.name}</h3>
-      <p><strong>Email:</strong> {registration.email}</p>
-      <p><strong>Phone:</strong> {registration.phone}</p>
-      <p><strong>Workshop:</strong> {registration.workshop}</p>
-      <p><strong>Date:</strong> {registration.date}</p>
-      <p><strong>Age:</strong> {registration.age}</p>
+    <article className="summary-card">
+      <p>{title}</p>
+      <h2>{value}</h2>
+      <small>{description}</small>
+    </article>
+  );
+}
 
-      {registration.portfolio && (
-        <p>
-          <strong>Portfolio:</strong>{' '}
-          <a
-            href={registration.portfolio}
-            target="_blank"
-            rel="noreferrer"
-          >
-            View portfolio
-          </a>
-        </p>
-      )}
+function CourseCard({ course, onToggleStatus }) {
+  const completed = course.status === 'Completed';
+
+  return (
+    <article className="course-card">
+      <div className="course-top">
+        <span className="course-code">{course.code}</span>
+        <span className={completed ? 'badge completed' : 'badge progress'}>
+          {course.status}
+        </span>
+      </div>
+
+      <p className="category">{course.category}</p>
+      <h3>{course.title}</h3>
+      <p className="instructor">
+        Instructor: {course.instructor}
+      </p>
+
+      <div className="progress-heading">
+        <span>Course progress</span>
+        <strong>{course.progress}%</strong>
+      </div>
+
+      <div
+        className="progress-track"
+        role="progressbar"
+        aria-label={`${course.title} progress`}
+        aria-valuenow={course.progress}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <div
+          className="progress-fill"
+          style={{ width: `${course.progress}%` }}
+        />
+      </div>
 
       <button
         type="button"
-        onClick={() => onRemove(registration.id)}
+        className={completed ? 'secondary-button' : 'primary-button'}
+        onClick={() => onToggleStatus(course.id)}
       >
-        Remove
+        {completed ? 'Mark In Progress' : 'Mark Completed'}
       </button>
     </article>
   );
 }
 
 export default function App() {
-  const [form, setForm] = useState(initialForm);
-  const [errors, setErrors] = useState({});
-  const [registrations, setRegistrations] = useState([]);
-  const [success, setSuccess] = useState('');
+  const [courses, setCourses] = useState(initialCourses);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('All');
 
-  function handleChange(e) {
-    const { name, value } = e.target;
+  const completedCount = courses.filter(
+    course => course.status === 'Completed'
+  ).length;
 
-    setForm(previous => ({
-      ...previous,
-      [name]: value
-    }));
+  const inProgressCount = courses.filter(
+    course => course.status === 'In Progress'
+  ).length;
 
-    setErrors(previous => ({
-      ...previous,
-      [name]: ''
-    }));
+  const averageProgress = courses.length
+    ? Math.round(
+        courses.reduce((total, course) => total + course.progress, 0)
+        / courses.length
+      )
+    : 0;
 
-    setSuccess('');
-  }
+  const visibleCourses = courses.filter(course => {
+    const matchesSearch =
+      course.title.toLowerCase().includes(search.toLowerCase()) ||
+      course.code.toLowerCase().includes(search.toLowerCase()) ||
+      course.instructor.toLowerCase().includes(search.toLowerCase());
 
-  function validateForm() {
-    const newErrors = {};
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phonePattern = /^\+?[0-9\s()-]{9,16}$/;
+    const matchesFilter =
+      filter === 'All' || course.status === filter;
 
-    if (!form.name.trim()) {
-      newErrors.name = 'Please enter your full name.';
-    }
+    return matchesSearch && matchesFilter;
+  });
 
-    if (!emailPattern.test(form.email.trim())) {
-      newErrors.email = 'Enter a valid email address.';
-    }
+  function toggleStatus(id) {
+    setCourses(previousCourses =>
+      previousCourses.map(course => {
+        if (course.id !== id) return course;
 
-    if (!phonePattern.test(form.phone.trim())) {
-      newErrors.phone = 'Enter a valid phone number.';
-    }
+        const completed = course.status !== 'Completed';
 
-    if (!form.date) {
-      newErrors.date = 'Please select a workshop date.';
-    } else {
-      const selectedDate = new Date(`${form.date}T00:00:00`);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      if (selectedDate < today) {
-        newErrors.date = 'Choose today or a future date.';
-      }
-    }
-
-    const age = Number(form.age);
-
-    if (!form.age || !Number.isFinite(age) ||
-        age < 16 || age > 100) {
-      newErrors.age = 'Age must be between 16 and 100.';
-    }
-
-    if (
-      form.portfolio.trim() &&
-      !/^https?:\/\/\S+\.\S+/i.test(form.portfolio.trim())
-    ) {
-      newErrors.portfolio =
-        'Enter a valid URL beginning with http:// or https://.';
-    }
-
-    if (!form.workshop) {
-      newErrors.workshop = 'Please select a workshop.';
-    }
-
-    return newErrors;
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-
-    const validationErrors = validateForm();
-    setErrors(validationErrors);
-    setSuccess('');
-
-    if (Object.keys(validationErrors).length > 0) {
-      return;
-    }
-
-    const newRegistration = {
-      ...form,
-      id: Date.now()
-    };
-
-    setRegistrations(previous => [
-      ...previous,
-      newRegistration
-    ]);
-
-    setForm({ ...initialForm });
-    setErrors({});
-    setSuccess('Registration completed successfully!');
-  }
-
-  function handleRemove(id) {
-    setRegistrations(previous =>
-      previous.filter(item => item.id !== id)
+        return {
+          ...course,
+          status: completed ? 'Completed' : 'In Progress',
+          progress: completed ? 100 : 0
+        };
+      })
     );
-
-    setSuccess('Registration removed.');
   }
 
   return (
-    <main>
-      <h1>Workshop Registration</h1>
-      <p>Complete the form to register for a workshop.</p>
+    <div className="app-layout">
+      <aside className="sidebar">
+        <h2 className="brand">Campus<span>Hub</span></h2>
 
-      <form onSubmit={handleSubmit} noValidate>
-        <div className="grid">
-          <label>
-            Full name
-            <input
-              name="name"
-              type="text"
-              value={form.name}
-              onChange={handleChange}
-              required
-              autoComplete="name"
-              aria-invalid={Boolean(errors.name)}
-            />
-            {errors.name && (
-              <span className="error">{errors.name}</span>
-            )}
-          </label>
+        <p className="sidebar-label">MENU</p>
 
-          <label>
-            Email address
-            <input
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              autoComplete="email"
-              aria-invalid={Boolean(errors.email)}
-            />
-            {errors.email && (
-              <span className="error">{errors.email}</span>
-            )}
-          </label>
+        <nav>
+          <a className="nav-link active" href="#dashboard">
+            Dashboard
+          </a>
+          <a className="nav-link" href="#courses">
+            My Courses
+          </a>
+          <a className="nav-link" href="#overview">
+            Progress Overview
+          </a>
+        </nav>
 
-          <label>
-            Phone number
-            <input
-              name="phone"
-              type="tel"
-              value={form.phone}
-              onChange={handleChange}
-              required
-              autoComplete="tel"
-              pattern="[+]?[0-9 ()-]{9,16}"
-              aria-invalid={Boolean(errors.phone)}
-            />
-            {errors.phone && (
-              <span className="error">{errors.phone}</span>
-            )}
-          </label>
-
-          <label>
-            Workshop date
-            <input
-              name="date"
-              type="date"
-              value={form.date}
-              onChange={handleChange}
-              required
-              aria-invalid={Boolean(errors.date)}
-            />
-            {errors.date && (
-              <span className="error">{errors.date}</span>
-            )}
-          </label>
-
-          <label>
-            Age
-            <input
-              name="age"
-              type="number"
-              value={form.age}
-              onChange={handleChange}
-              min="16"
-              max="100"
-              required
-              aria-invalid={Boolean(errors.age)}
-            />
-            {errors.age && (
-              <span className="error">{errors.age}</span>
-            )}
-          </label>
-
-          <label>
-            Portfolio URL (optional)
-            <input
-              name="portfolio"
-              type="url"
-              value={form.portfolio}
-              onChange={handleChange}
-              placeholder="https://example.com"
-              aria-invalid={Boolean(errors.portfolio)}
-            />
-            {errors.portfolio && (
-              <span className="error">{errors.portfolio}</span>
-            )}
-          </label>
-
-          <label>
-            Select workshop
-            <select
-              name="workshop"
-              value={form.workshop}
-              onChange={handleChange}
-              required
-              aria-invalid={Boolean(errors.workshop)}
-            >
-              <option value="">Choose a workshop</option>
-              <option value="Web Development">
-                Web Development
-              </option>
-              <option value="React Fundamentals">
-                React Fundamentals
-              </option>
-              <option value="Database Design">
-                Database Design
-              </option>
-            </select>
-            {errors.workshop && (
-              <span className="error">{errors.workshop}</span>
-            )}
-          </label>
-        </div>
-
-        <button type="submit">Register</button>
-
-        <button
-          type="button"
-          onClick={() => {
-            setForm({ ...initialForm });
-            setErrors({});
-            setSuccess('');
-          }}
-        >
-          Reset form
-        </button>
-
-        {success && (
-          <p className="success" role="status">
-            {success}
-          </p>
-        )}
-      </form>
-
-      <section aria-labelledby="registrations-heading">
-        <h2 id="registrations-heading">
-          Registered Students ({registrations.length})
-        </h2>
-
-        {registrations.length === 0 ? (
-          <p>No registrations yet. Complete the form above.</p>
-        ) : (
-          <div className="grid">
-            {registrations.map(registration => (
-              <RegistrationCard
-                key={registration.id}
-                registration={registration}
-                onRemove={handleRemove}
-              />
-            ))}
+        <div className="student-profile">
+          <div className="avatar">S</div>
+          <div>
+            <strong>Student</strong>
+            <small>Information Technology</small>
           </div>
-        )}
-      </section>
-    </main>
+        </div>
+      </aside>
+
+      <main className="dashboard" id="dashboard">
+        <header className="page-header">
+          <div>
+            <p className="eyebrow">STUDENT PORTAL</p>
+            <h1>Student Course Dashboard</h1>
+            <p className="subtitle">
+              Welcome back! Track your learning and course progress.
+            </p>
+          </div>
+          <div className="date-label">
+            My Learning
+          </div>
+        </header>
+
+        <section className="summary-grid" id="overview">
+          <SummaryCard
+            title="Total Courses"
+            value={courses.length}
+            description="Your enrolled courses"
+          />
+          <SummaryCard
+            title="Completed"
+            value={completedCount}
+            description="Courses finished"
+          />
+          <SummaryCard
+            title="In Progress"
+            value={inProgressCount}
+            description="Courses to continue"
+          />
+          <SummaryCard
+            title="Average Progress"
+            value={`${averageProgress}%`}
+            description="Across all courses"
+          />
+        </section>
+
+        <section className="courses-section" id="courses">
+          <div className="section-heading">
+            <div>
+              <h2>My Courses</h2>
+              <p>Explore and manage your enrolled courses.</p>
+            </div>
+            <span className="course-count">
+              {visibleCourses.length} shown
+            </span>
+          </div>
+
+          <div className="toolbar">
+            <label className="search-box">
+              <span>Search courses</span>
+              <input
+                type="search"
+                value={search}
+                onChange={event => setSearch(event.target.value)}
+                placeholder="Search by title, code or instructor..."
+              />
+            </label>
+
+            <label className="filter-box">
+              <span>Filter by status</span>
+              <select
+                value={filter}
+                onChange={event => setFilter(event.target.value)}
+              >
+                <option value="All">All Courses</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </label>
+          </div>
+
+          {visibleCourses.length === 0 ? (
+            <div className="empty-state">
+              <h3>No courses found</h3>
+              <p>
+                Try another search term or change the status filter.
+              </p>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => {
+                  setSearch('');
+                  setFilter('All');
+                }}
+              >
+                Clear Search and Filter
+              </button>
+            </div>
+          ) : (
+            <div className="course-grid">
+              {visibleCourses.map(course => (
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  onToggleStatus={toggleStatus}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <footer>
+          CampusHub Student Portal · React Course Dashboard
+        </footer>
+      </main>
+    </div>
   );
 }

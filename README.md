@@ -1,12 +1,12 @@
 
-# Interactive Workshop Registration
+# Student Course Dashboard
 
 ## Project Description
 
-A responsive React application that allows students
-to register for workshops. It includes controlled
-inputs, form validation, success messages, and the
-ability to display and remove registrations.
+A responsive React dashboard that allows students to
+view enrolled courses, monitor course progress, search
+for courses, filter by completion status and update
+course status.
 
 ## Technologies Used
 
@@ -15,51 +15,31 @@ ability to display and remove registrations.
 - CSS
 - Vite
 
-## Requirements
+## Features
 
-- Node.js
-- npm
-- Visual Studio Code
-
-## How to Run the Project
-
-1. Download or clone this repository.
-2. Open the project folder in VS Code.
-3. Open the terminal.
-4. Run `npm install`.
-5. Run `npm run dev`.
-6. Open the local URL shown in the terminal.
-
-## Main Features
-
-- Controlled form inputs
-- Email and phone validation
-- Age and date validation
-- Workshop selection
-- Registration cards
-- Immutable array updates
-- Remove registration
-- Success and error messages
+- Student dashboard overview
+- Course summary statistics
+- Reusable course cards
+- Search by course title, code or instructor
+- Filter courses by status
+- Course progress bars
+- Mark courses as completed or in progress
+- Empty-state messages
 - Responsive layout
 
-## Screenshots
+## Installation and Setup
 
-### Screenshot 1: Registration Form
+1. Install Node.js.
+2. Download or clone this repository.
+3. Open the project folder in VS Code.
+4. Run `npm install`.
+5. Run `npm run dev`.
+6. Open the local URL displayed in the terminal.
 
-(11.jpg)
-
-### Screenshot 2: Registered Students
-
-(9.jpg)
 
 ## Author
+
 MAGOBA LENETTE
 
-## Registration Number
-S25D14/034
-
-## Access Number
-B35385
-
-## Repository
-https://github.com/lenettem/FORM-WORKSHOP-REGISTRATION.git
+## GitHub Repository
+https://github.com/lenettem/STUDENT-DASHBOARD.git
