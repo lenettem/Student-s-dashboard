@@ -42,4 +42,7 @@ course status.
 MAGOBA LENETTE
 
 ## GitHub Repository
-https://github.com/lenettem/STUDENT-DASHBOARD.git
+https://github.com/lenettem/Student-s-dashboard
+
+## Local host link for student dasboard
+ http://localhost:5174/
